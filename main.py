@@ -343,6 +343,7 @@ from rdkit.Chem import Descriptors
 
 import torch
 import torch.nn.functional as F
+torch.set_num_threads(1)
 from torch_geometric.nn import GCNConv, global_mean_pool, global_max_pool
 from torch_geometric.data import Data
 
