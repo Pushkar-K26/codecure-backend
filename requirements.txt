@@ -25,3 +25,5 @@ rdkit
 # API Integration
 requests
 chembl_webresource_client
+
+python-multipart
