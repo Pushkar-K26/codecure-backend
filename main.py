@@ -395,14 +395,20 @@ class Tox21GNN(torch.nn.Module):
         x = self.fc2(x) 
         return x
 
-print("Loading Advanced GNN Toxicity Model...")
-try:
-    toxicity_model = Tox21GNN()
-    toxicity_model.load_state_dict(torch.load('tox21_final_model.pth', map_location=torch.device('cpu'), weights_only=True))
-    toxicity_model.eval() 
-    print("✅ PyTorch GNN Loaded Successfully!")
-except Exception as e:
-    print(f"❌ Error loading model: {e}")
+toxicity_model = None  # Create an empty global variable
+
+@app.on_event("startup")
+async def load_ai_model():
+    global toxicity_model
+    print("Server port is open! Now loading the Advanced GNN Toxicity Model in the background...")
+    try:
+        # Load the model AFTER the server has successfully started
+        toxicity_model = Tox21GNN()
+        toxicity_model.load_state_dict(torch.load('tox21_final_model.pth', map_location=torch.device('cpu'), weights_only=True))
+        toxicity_model.eval() 
+        print("✅ PyTorch GNN Loaded Successfully!")
+    except Exception as e:
+        print(f"❌ Error loading model: {e}")
 
 # 3. HELPER FUNCTIONS
 def smiles_to_graph(smiles_string: str):
@@ -516,6 +522,8 @@ async def predict_toxicity(
     db: Session = Depends(get_db),
     authorization: Optional[str] = Header(None)
 ):
+    if toxicity_model is None:
+        raise HTTPException(status_code=503, detail="AI Model is still warming up. Please try again in 30 seconds.")
     try:
         # ML Logic
         graph_data = smiles_to_graph(request.smiles)
