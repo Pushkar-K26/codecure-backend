@@ -27,3 +27,5 @@ requests
 chembl_webresource_client
 
 python-multipart
+
+bcrypt==3.2.2
