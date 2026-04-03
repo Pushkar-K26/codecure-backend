@@ -1,0 +1,26 @@
+# Web Framework & Server
+fastapi
+uvicorn
+
+#Database
+sqlalchemy
+psycopg2-binary
+
+#Authentication & Security
+passlib[bcrypt]
+python-jose[cryptography]
+
+#Environment & Config
+python-dotenv
+
+# AI & Machine Learning
+torch
+torch-geometric
+scikit-learn
+
+# Bioinformatics & Cheminformatics
+rdkit
+
+# API Integration
+requests
+chembl_webresource_client
