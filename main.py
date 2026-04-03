@@ -339,7 +339,7 @@ import io
 
 from rdkit import Chem
 from rdkit.Chem import Descriptors
-from chembl_webresource_client.new_client import new_client
+
 
 import torch
 import torch.nn.functional as F
@@ -440,8 +440,14 @@ def get_compound_data(smiles: str):
     except Exception:
         return "Unknown / Novel Compound", None
 
+# ... existing code ...
+
 def get_chembl_data(compound_name: str, smiles: str):
     try:
+        # THE FIX: We import the client right here, right before we need it!
+        # If ChEMBL's API is down, it fails gracefully inside this try/except block
+        from chembl_webresource_client.new_client import new_client
+        
         molecule = new_client.molecule
         fields_to_pull = ['molecule_chembl_id', 'max_phase', 'molecule_type', 'black_box_warning', 'withdrawn_flag', 'first_approval', 'molecule_properties', 'indication_class']
         mols = molecule.filter(molecule_structures__canonical_smiles=smiles).only(fields_to_pull)
@@ -461,9 +467,11 @@ def get_chembl_data(compound_name: str, smiles: str):
                 "psa": props.get('psa', 'N/A'),
                 "qed_score": props.get('qed_weighted', 'N/A')
             }
-    except Exception as e: print(f"ChEMBL API Error: {e}")
+    except Exception as e: 
+        print(f"ChEMBL API Error: {e}")
     return {"id": "Unregistered", "max_phase": 0, "type": "Novel / Uncatalogued"}
 
+# ... rest of your code ...
 # 4. AUTHENTICATION ROUTES
 @app.post("/api/signup", response_model=schemas.Token)
 def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
